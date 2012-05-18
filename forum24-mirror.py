@@ -255,10 +255,15 @@ class Page:
 
             def tag_local_img(match):
                 url = re.sub ( r"\\", '', match.group(2))
+                save = 'img/external'
                 if url[0]=='/':
                     url = "%s%s" % ( forum['url'], url) 
+                for reg in forum['local_images_regex']:
+                    if re.match(reg, url):
+                        save = 'img/local'
+                        break
                 try:
-                    local = opensavelocal(url, 'img/local')
+                    local = opensavelocal(url, save)
                 except:
                     return '<img src="../%s" alt="Image download failed: %s"/>' %(forum['fail_image'], url)
                 return '<img src="%s" alt="%s"/>' % (local, url)

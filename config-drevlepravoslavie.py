@@ -13,6 +13,7 @@ forum = {
     'add_themes' : [ {'id':20, 'after':10, 'title':'Архив'} ],
     'ignore_themes' : [ 10, ],
     'fail_image' : 'img/failed2.png',
+    'local_images_regex' : [ r'.*photobucket.com/albums/hh488/VKsenos.*', r'.*forum24.ru.*'],
 
     'prefix-country': '<b>Откуда: </b>',
     'prefix-city': ', ',

@@ -1,4 +1,7 @@
 *.py[co]
+drevlepravoslavie.forum24.ru/data/*
+drevlepravoslavie.forum24.ru/img/local/*
+drevlepravoslavie.forum24.ru/index.html
 
 # Packages
 *.egg
