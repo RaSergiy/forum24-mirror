@@ -3,7 +3,7 @@
 
 forum = { 
     'themes_per_page' : 30,
-    'image_caching':    False,
+    'image_caching':    True,
     'alias' : 'drevlepravoslavie.forum24.ru',
     'url' : 'http://drevlepravoslavie.forum24.ru',
     'gifdomen' : 'http://drevlepravoslavie.forum24.ru',
