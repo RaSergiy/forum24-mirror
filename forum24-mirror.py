@@ -6,6 +6,7 @@ import os
 import time
 import errno
 import codecs
+import socket
 import httplib
 import datetime
 import urllib2
@@ -13,6 +14,8 @@ import sys
 import md5
 reload(sys)
 sys.setdefaultencoding('UTF-8')
+socket.setdefaulttimeout(45)
+
 
 if len(sys.argv) < 2:
     print "usage: forum24-mirror.py <site-config>" 
@@ -68,7 +71,7 @@ class SmartRedirectHandler(urllib2.HTTPRedirectHandler):
 
 class Downloader:
 
-    def __init__(self, log=None, maxretry=4):
+    def __init__(self, log=None, maxretry=5):
         self.maxretry = maxretry
         self.count = 0
         self.error = 0
@@ -80,12 +83,12 @@ class Downloader:
                 request = urllib2.Request(page.url)
                 opener = urllib2.build_opener(SmartRedirectHandler())
                 web = opener.open(request)
-                page.content = str.join('',web.readlines())
+                page.content = web.read()
                 self.count += 1
                 page.on_load()
                 break
             except (IOError, httplib.IncompleteRead):
-                if retry < self.maxretry-1:
+                if retry < self.maxretry:
                     print("Page %s fetch failed. Retry #%s" %(page.url, retry+1,))
                     time.sleep(retry*0.2)
                 else:
@@ -103,8 +106,8 @@ class Page:
     def on_load(self):
         if self.savepath:
             mkdir_p(os.path.dirname(self.savepath))
-            f = open(self.savepath, 'w')
-            f.write(self.content)
+            f = codecs.open(self.savepath, 'w', 'ibm866')
+            f.write(self.content.decode('ibm866'))
             f.close()
 
     def get_themes_count(self):
@@ -184,6 +187,33 @@ class Page:
                     zams[zz[0]] = [ zz[1] ]
 
         def tparse(obj):
+            def tag_more(mtch):
+                global uniqid
+                uniqid += 1
+                return template['tag:more'] % { 'uniqid': '%04d' % (uniqid,), 'text': mtch.group(1) }
+            def tag_local_img(match):
+                url = re.sub ( r"\\", '', match.group(2))
+                save = 'img/ext'
+                if url[0]=='/':
+                    url = "%s%s" % ( forum['url'], url) 
+                for reg in forum['local_images_regex']:
+                    if re.match(reg, url):
+                        save = 'img/loc'
+                        break
+                try:
+                    local = opensavelocal(url, save)
+                except:
+                    return '<img src="../%s" alt="Image download failed: %s"/>' %(forum['fail_image'], url)
+                return '<img src="%s" alt="%s"/>' % (local, url)
+            mod = { '\<img (.*?)src="(.*?)"(.*?)\>':tag_local_img, 
+                    '\[more\](.*?)\[/more\]':tag_more,
+                    '\[off\]\(.*?\)\[\/off\]':'<span class="offtopic">Оффтопик: \\1</span><BR>',
+                    '\[BR\]': '<br/><span class="indent"></span>',
+                    '<BR>': '<br/><span class="indent"></span>',
+                    '\[quote\](.*?)\[\/quote\]':'</p><blockquote><p>\\1</p></blockquote><p>',
+                    '\[pre\](.*?)\[\/pre\]':'<pre>\\1</pre>',
+                    '\[pre2\](.*?)\[\/pre2\]':'<pre>\\1</pre>',
+            }
             t = obj[4:-4].split("','")
 
             default_valgetter = lambda val: str(val)
@@ -205,6 +235,15 @@ class Page:
                     getpo(post, postinfo, t, infoindex)
                 else:
                     getpo(post, postinfo[0], t, infoindex, *postinfo[1:])
+
+            post['location']=''
+            if post['country'] != '' or post['city'] != '':
+                if post['country'] != '' and post['city'] != '':
+                    post['location'] = ', '.join((post['country'], post['city']))
+                else:
+                    post['location'] = post['country'] + post['city']
+            post['location'] = gettext(post['location'], 'location')
+
             if post['thanks']:
                 thanks = post['thanks'][1:-1].split('``')
                 post['thanks'] = template['thanks'] % { 'count':len(thanks), 'users':', '.join(thanks) }
@@ -219,7 +258,7 @@ class Page:
                     vf = 'jpg'
                 loc = '%s.%s' % (post['member'], vf)
                 url = forum['avatars'] + loc
-                local = opensavelocal(url, 'img/local/ava')
+                local = opensavelocal(url, 'img/loc')
                 post['avatar'] = '<img src="%s"/>' % (local,)
             else:
                 post['avatar'] = ''
@@ -231,7 +270,7 @@ class Page:
                     if r >0:
                         loc = "s%d.gif" % (r)
                         url = '%s%s' % (forum['diz'][0], loc)
-                        local = opensavelocal(url, 'img/local/rang')
+                        local = opensavelocal(url, 'img/loc')
                         post['rang'] = '<img src="%s"/>' % (local)
                     else:
                         post['rang'] = ''
@@ -242,46 +281,10 @@ class Page:
                 zamechaniya = zams[post['member']]
                 for count, zame in enumerate(zamechaniya):
                     post['zamechanie'] += template['zamechanie'] % { 'count': count, 'user':post['member'], 'text': zame, 'gif': forum['gif-zamechanie'] }
-                post['zamechanie'] = gettext(post['zamechanie'], 'zamechanie')
-                
-
-                
-
-
-            def tag_more(mtch):
-                global uniqid
-                uniqid += 1
-                return template['tag:more'] % { 'uniqid': '%04d' % (uniqid,), 'text': mtch.group(1) }
-
-            def tag_local_img(match):
-                url = re.sub ( r"\\", '', match.group(2))
-                save = 'img/external'
-                if url[0]=='/':
-                    url = "%s%s" % ( forum['url'], url) 
-                for reg in forum['local_images_regex']:
-                    if re.match(reg, url):
-                        save = 'img/local'
-                        break
-                try:
-                    local = opensavelocal(url, save)
-                except:
-                    return '<img src="../%s" alt="Image download failed: %s"/>' %(forum['fail_image'], url)
-                return '<img src="%s" alt="%s"/>' % (local, url)
-
-            mod = { '\<img (.*?)src="(.*?)"(.*?)\>':tag_local_img, 
-                    '\[more\](.*?)\[/more\]':tag_more,
-                    '\[off\]\(.*?\)\[\/off\]':'<span class="offtopic">Оффтопик: \\1</span><BR>',
-                    '\[BR\]': '<br/><span class="indent"></span>',
-                    '<BR>': '<br/><span class="indent"></span>',
-                    '\[quote\](.*?)\[\/quote\]':'<blockquote>\\1</blockquote>',
-                    '\[pre\](.*?)\[\/pre\]':'<pre>\\1</pre>',
-                    '\[pre2\](.*?)\[\/pre2\]':'<pre>\\1</pre>',
-            }
+            post['zamechanie'] = gettext(post['zamechanie'], 'zamechanie')
 
             for regexp, repl in mod.iteritems():
                 post['text'] = re.sub(re.compile(regexp), repl, post['text'])
-
-
             return post
         return map(tparse, m)
 
@@ -294,7 +297,7 @@ downloader = Downloader()
 forum['timestamp'] = gentime(time.time())
 forum['relativepath']=''
 forum['gif-zamechanie-url'] = "%s/gif/img/zm.gif" % ( forum['gifdomen'] )
-forum['gif-zamechanie'] = opensavelocal(forum['gif-zamechanie-url'], 'img/local')
+forum['gif-zamechanie'] = opensavelocal(forum['gif-zamechanie-url'], 'img/loc')
 
 page = Page(forum['url'])
 downloader.open_page(page)
@@ -327,7 +330,7 @@ for bgr in forum['structure']:
 
         block["themes_count"] = page.get_themes_count()
         block["answers_count"] = 0
-        block['filename'] = 'index-%s.html' % ( block['id'])
+        block['filename'] = '%03d.html' % ( block['id'])
         if blockgroup['oddity']:
             block['oddity']='odd' 
         else: 
@@ -343,6 +346,7 @@ for bgr in forum['structure']:
             themes += page.get_themes()
 
         of = codecs.open('%s/data/%s' % (forum['outdir'], block['filename']), 'w', 'utf-8')
+        forum['title'] = "%s [%s]" % ( block['title'], forum['alias'])
         render (of, 'head', ['forum'])
         render (of, 'content', ['forum'])
         render (of, 'block', ['forum', 'blockgroup', 'block'])
@@ -355,17 +359,18 @@ for bgr in forum['structure']:
                 theme['oddity']='odd' 
             else: 
                 theme['oddity']='even'
-            theme['filename'] = 'theme-%03d-%08d.html' % ( theme['forum_id'], theme['id'])
+            theme['filename'] = 't%03d%08d.html' % ( theme['forum_id'], theme['id'])
             render (of, 'block_theme', ['forum', 'blockgroup', 'block', 'theme'])
 
             page = Page(theme['url'])
             print "      %s" % (theme['url'])
             downloader.open_page(page)
+            posts = page.get_posts()
             otheme = codecs.open('%s/data/%s' % (forum['outdir'], theme['filename']), 'w', 'utf-8')
+            forum['title'] = "%s [%s]" % ( posts[0]['title'], forum['alias'])
             render (otheme, 'head', ['forum'])
             render (otheme, 'content', ['forum'])
             render (otheme, 'theme', ['forum', 'blockgroup', 'block', 'theme'])
-            posts = page.get_posts()
             oddpost = False
             for post in posts:
                 oddpost = not oddpost
