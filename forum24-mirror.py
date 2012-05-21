@@ -51,7 +51,7 @@ def opensavelocal(url, localpath, relative='../'):
 def mkdir_p(path):
     try:
         os.makedirs(path)
-    except OSError as exc:
+    except OSError, exc:
         if exc.errno == errno.EEXIST:
             pass
         else: raise
@@ -304,7 +304,13 @@ downloader.open_page(page)
 forum['structure'] = page.parse_root()
 
 def render (outfile, templatename, dicts):
-    t = template[templatename] % { dic + '-' + k : globals()[dic][k] for dic in dicts for k in globals()[dic].keys()}
+#    t = template[templatename] % { dic + '-' + k : globals()[dic][k] for dic in dicts for k in globals()[dic].keys()}
+    tv = { }
+    for dic in dicts:
+        glob = globals()[dic]
+        for k in glob.keys():
+            tv [ "%s-%s" %( dic, k) ] = glob[k]
+    t = template[templatename] % tv
     return outfile.write(t)
 
 mkdir_p('%s/data' % (forum['outdir']))
