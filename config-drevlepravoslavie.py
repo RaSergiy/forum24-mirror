@@ -9,7 +9,7 @@ forum = {
     'gifdomen' : 'http://drevlepravoslavie.forum24.ru',
     'avatars':'http://forum24.ru/avr/d/drevlepravoslavie/avatar/',
     'title' : 'Древлеправославие',
-    'outdir' : 'drevlepravoslavie.forum24.ru',
+    'outdir' : '/opt/mirrors/drevlepravoslavie.forum24.ru-%FSTIMESTAMP%',
     'add_themes' : [ {'id':20, 'after':10, 'title':'Архив'} ],
     'ignore_themes' : [ 10, ],
     'fail_image' : 'img/failed.png',
