@@ -3,23 +3,25 @@
 
 forum = { 
     'themes_per_page' : 30,
-    'image_caching':    False,
-    'alias' : 'drevlepravoslavie.forum24.ru',
-    'url' : 'http://drevlepravoslavie.forum24.ru',
-    'gifdomen' : 'http://drevlepravoslavie.forum24.ru',
-    'avatars':'http://forum24.ru/avr/d/drevlepravoslavie/avatar/',
-    'title' : 'Древлеправославие',
-    'outdir' : 'drevlepravoslavie.forum24.ru',
-    'add_themes' : [ {'id':20, 'after':10, 'title':'Архив'} ],
+    'image_caching': True,
+    'alias' : 'starovery.unoforum.ru',
+    'url' : 'http://starovery.unoforum.ru',
+    'gifdomen' : 'http://starovery.unoforum.ru',
+    'avatars': 'http://unoforum.ru/uavr/s/starovery/avatar/',
+    'title' : 'Староверы',
+    'indir' : 'starovery.unoforum.ru',
+    'outdir' : 'starovery.unoforum.ru-%FSTIMESTAMP%',
+    'add_themes' : [ ], #{'id':20, 'after':10, 'title':'Архив'} ],
     'ignore_themes' : [ 10, ],
     'fail_image' : 'img/failed.png',
-    'local_images_regex' : [ r'.*photobucket.com/albums/hh488/VKsenos.*', r'.*forum24.ru.*'],
+    'local_images_regex' : [ r'.*photobucket.com/albums/hh488/VKsenos.*', r'.*forum24.ru.*', r'.*unoforum.ru.*'],
 
     'prefix-location': '<b>Откуда: </b>',
     'prefix-message_n': '<b>Сообщение: </b>',
     'prefix-zvanie': '',
     'prefix-zamechanie': 'Замечания: ',
     'prefix-userinfo': '<b>Упование: </b>',
+    'prefix-reyting': '<b>Репутация: </b>',
     'prefix-registered': '<b>Зарегистрирован: </b>',
     'prefix-sign':'<div class="post-sign">',
     'postfix-sign':'</div>',
@@ -27,7 +29,7 @@ forum = {
  
 
 template = {
-    'thanks' :  '<p><div class="post-thanks" onmouseover="tooltip.show(\'%(users)s\');" onmouseout="tooltip.hide();">Спаси Христос: %(count)d</div></p>',
+    'thanks' :  '<p><div class="post-thanks" onmouseover="tooltip.show(\'%(users)s\');" onmouseout="tooltip.hide();">Благодарствую-с: %(count)d</div></p>',
     'zamechanie' :  '<img onmouseover="tooltip.show(\'%(text)s\');" onmouseout="tooltip.hide();" src="%(gif)s"/>',
     'head'          : '<html><head><title>%(forum-title)s</title><link rel="stylesheet" type="text/css" href="%(forum-relativepath)sstyle.css" media="all"/><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><script type="text/javascript" src="%(forum-relativepath)sscripts.js"></script></head><body><div id="layout"><div id="head"><a href="%(forum-relativepath)sindex.html"><img src="%(forum-relativepath)simg/head.jpg"/></a></div>',
 
@@ -48,8 +50,8 @@ template = {
 
     'theme'         : '<div id="nav"><p><a href="../index.html">Архив форума от %(forum-timestamp)s</a> → <a href="%(block-filename)s">%(block-title)s</a> → <span class="theme-title">%(theme-title)s</span></p></div><table id="posts"><colgroup><col width="120"/><col/></colgroup>',
     '/theme'        : '</table>',
-    'post'          : '<tr class="row-%(post-oddity)s"><td class="post-info"><span class="post-author">%(post-author)s</span> <div class="post-infoblock"><span class="post-zvanie">%(post-zvanie)s</span> <span class="post-userinfo">%(post-userinfo)s</span> <span class="post-rang">%(post-rang)s</span> <span class="post-location">%(post-location)s</span> <span class="post-message_n">%(post-message_n)s</span> <span class="post-registered">%(post-registered)s</span> <span class="post-avatar">%(post-avatar)s</span> <span class="post-zamechanie">%(post-zamechanie)s</div></div></td><td class="post-body"><div class="post-head"><b>Отправлено:</b> %(post-timestamp)s. <b>Заголовок:</b> %(post-title)s</div></div><div class="post-text"><p>%(post-text)s</p></div>%(post-sign)s%(post-thanks)s</td></tr>',
+    'post'          : '<tr class="row-%(post-oddity)s"><td class="post-info"><span class="post-author">%(post-author)s</span> <div class="post-infoblock"><span class="post-zvanie">%(post-zvanie)s</span> <span class="post-userinfo">%(post-userinfo)s</span> <span class="post-reyting">%(post-reyting)s</span> <span class="post-location">%(post-location)s</span> <span class="post-message_n">%(post-message_n)s</span> <span class="post-registered">%(post-registered)s</span> <span class="post-avatar">%(post-avatar)s</span> <span class="post-zamechanie">%(post-zamechanie)s</div></div></td><td class="post-body"><div class="post-head"><b>Отправлено:</b> %(post-timestamp)s. <b>Заголовок:</b> %(post-title)s</div></div><div class="post-text"><p>%(post-text)s</p></div>%(post-sign)s%(post-thanks)s</td></tr>',
 
     '/content'      : '</div>',
-    '/head'         : '<div id="footer"><p>Зеркало форума <a href="%(forum-source)s">%(forum-url)s</a> от %(forum-timestamp)s</p><img src="%(forum-relativepath)simg/footer.jpg"></div></div></body></html>',
+    '/head'         : '<div id="footer"><p>Зеркало форума <a href="%(forum-source)s">%(forum-url)s</a> от %(forum-timestamp)s</p></div></div></body></html>',
 }

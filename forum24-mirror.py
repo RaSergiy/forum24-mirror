@@ -313,7 +313,13 @@ def render (outfile, templatename, dicts):
     t = template[templatename] % tv
     return outfile.write(t)
 
+forum['outdir'] = re.sub(r'%FSTIMESTAMP%', 
+        datetime.datetime.fromtimestamp(int(time.time())).strftime("%Y-%m-%d_%H%M%S"),
+        forum['outdir'])
+if os.system('cp -R "%s" "%s"' % (forum['indir'], forum['outdir'])) != 0:
+    raise Exception('Failed indir->outdir copying')
 mkdir_p('%s/data' % (forum['outdir']))
+
 
 forum['filename']='%s/index.html' % (forum['outdir'])
 ofindex = codecs.open(forum['filename'], 'w', 'utf-8')
@@ -373,7 +379,11 @@ for bgr in forum['structure']:
             downloader.open_page(page)
             posts = page.get_posts()
             otheme = codecs.open('%s/data/%s' % (forum['outdir'], theme['filename']), 'w', 'utf-8')
-            forum['title'] = "%s [%s]" % ( posts[0]['title'], forum['alias'])
+            if posts:
+                forum['title'] = "%s [%s]" % ( posts[0]['title'], forum['alias'])
+            else:
+                print "Warning 0 themes!"
+                forum['title'] = "*Untitled"
             render (otheme, 'head', ['forum'])
             render (otheme, 'content', ['forum'])
             render (otheme, 'theme', ['forum', 'blockgroup', 'block', 'theme'])
