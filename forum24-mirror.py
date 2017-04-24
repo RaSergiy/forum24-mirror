@@ -138,7 +138,8 @@ class Page:
         return map(tparse, m)
 
     def parse_root(self):
-        m = re.search ( re.compile("main\('0'\);(.*)main2\('", re.DOTALL), self.content)
+        print (self.content)
+        m = re.search ( re.compile("main\('0'\);(.*)main2_1\('", re.DOTALL), self.content)
         if not m:
             raise Exception("Incorrect root")
         block = { 'title':"untitled", 'blocks':[] }
