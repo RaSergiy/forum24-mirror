@@ -3,17 +3,18 @@
 
 forum = { 
     'themes_per_page' : 30,
-    'image_caching':    False,
+    'image_caching':    True,
     'alias' : 'drevlepravoslavie.forum24.ru',
     'url' : 'http://drevlepravoslavie.forum24.ru',
     'gifdomen' : 'http://drevlepravoslavie.forum24.ru',
     'avatars':'http://forum24.ru/avr/d/drevlepravoslavie/avatar/',
     'title' : 'Древлеправославие',
-    'outdir' : '/opt/mirrors/drevlepravoslavie.forum24.ru-%FSTIMESTAMP%',
+    'outdir' : 'drevlepravoslavie.forum24.ru-%FSTIMESTAMP%',
+    'indir' : 'drevlepravoslavie.forum24.ru',
     'add_themes' : [ {'id':20, 'after':10, 'title':'Архив'} ],
     'ignore_themes' : [ 10, ],
     'fail_image' : 'img/failed.png',
-    'local_images_regex' : [ r'.*photobucket.com/albums/hh488/VKsenos.*', r'.*forum24.ru.*'],
+    'local_images_regex' : [ r'.*photobucket.com/albums/hh488/VKsenos.*', r'.*forum24.ru.*', r'.*unoforum.ru.*'],
 
     'prefix-location': '<b>Откуда: </b>',
     'prefix-message_n': '<b>Сообщение: </b>',

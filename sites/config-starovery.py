@@ -10,7 +10,7 @@ forum = {
     'avatars': 'http://unoforum.ru/uavr/s/starovery/avatar/',
     'title' : 'Староверы',
     'indir' : 'starovery.unoforum.ru',
-    'outdir' : '/opt/mirrors/starovery.unoforum.ru-%FSTIMESTAMP%',
+    'outdir' : 'starovery.unoforum.ru-%FSTIMESTAMP%',
     'add_themes' : [ ], #{'id':20, 'after':10, 'title':'Архив'} ],
     'ignore_themes' : [ 10, ],
     'fail_image' : 'img/failed.png',

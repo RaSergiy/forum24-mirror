@@ -12,6 +12,7 @@ import datetime
 import urllib2
 import sys
 import md5
+from distutils.dir_util import copy_tree
 reload(sys)
 sys.setdefaultencoding('UTF-8')
 socket.setdefaulttimeout(45)
@@ -23,6 +24,9 @@ if len(sys.argv) < 2:
 
 execfile(sys.argv[1])
 
+forum['outdir'] = re.sub(r'%FSTIMESTAMP%', 
+        datetime.datetime.fromtimestamp(int(time.time())).strftime("%Y-%m-%d_%H%M%S"),
+        forum['outdir'])
 downloaded_files = {}
 gentime = lambda t: datetime.datetime.fromtimestamp(int(t)).strftime("%Y.%m.%d %H:%M:%S")
 
@@ -49,6 +53,7 @@ def opensavelocal(url, localpath, relative='../'):
     return "%s%s" % (relative, locrel)
 
 def mkdir_p(path):
+    print('mkdir %s' % path)
     try:
         os.makedirs(path)
     except OSError, exc:
@@ -138,7 +143,6 @@ class Page:
         return map(tparse, m)
 
     def parse_root(self):
-        print (self.content)
         m = re.search ( re.compile("main\('0'\);(.*)main2_1\('", re.DOTALL), self.content)
         if not m:
             raise Exception("Incorrect root")
@@ -314,11 +318,11 @@ def render (outfile, templatename, dicts):
     t = template[templatename] % tv
     return outfile.write(t)
 
-forum['outdir'] = re.sub(r'%FSTIMESTAMP%', 
-        datetime.datetime.fromtimestamp(int(time.time())).strftime("%Y-%m-%d_%H%M%S"),
-        forum['outdir'])
-if os.system('cp -R "%s" "%s"' % (forum['indir'], forum['outdir'])) != 0:
-    raise Exception('Failed indir->outdir copying')
+print('Output to: %s' % forum['outdir'] )
+
+
+if forum['indir'] != forum['outdir']:
+    copy_tree(forum['indir'], forum['outdir'])
 mkdir_p('%s/data' % (forum['outdir']))
 
 
